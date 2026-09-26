@@ -1,0 +1,46 @@
+{
+  "name": "email-automation",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite client",
+    "server": "tsx watch server/index.ts",
+    "server:prod": "tsx server/index.ts",
+    "start": "tsx server/index.ts",
+    "dev:all": "concurrently \"npm run dev\" \"npm run server\"",
+    "build": "tsc -b && vite build client",
+    "lint": "oxlint",
+    "preview": "vite preview client"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "better-sqlite3": "^13.0.3",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.4",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.7.0",
+    "googleapis": "^182.0.0",
+    "helmet": "^8.3.0",
+    "lucide-react": "^1.48.0",
+    "node-cron": "^4.6.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "tailwindcss": "^4.3.3"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^9.6.0",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^24.13.3",
+    "@types/node-cron": "^3.0.11",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "@vitejs/plugin-react": "^6.1.1",
+    "concurrently": "^10.0.5",
+    "oxlint": "^1.81.0",
+    "tsx": "^4.23.15",
+    "typescript": "~6.0.2",
+    "vite": "^8.3.0"
+  }
+}
