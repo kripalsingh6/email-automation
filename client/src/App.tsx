@@ -1,13 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useApi } from './hooks/useApi';
 import { Header } from './components/Header';
 import { Dashboard } from './components/Dashboard';
 import { LogsTable } from './components/LogsTable';
+import { PerformanceDashboard } from './components/PerformanceDashboard';
 import { AlertCircle, RefreshCw } from 'lucide-react';
+import type { DailyReport } from './types/performance';
+
+type AppTab = 'dashboard' | 'logs' | 'performance';
 
 export function App() {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'logs'>('dashboard');
+  const [activeTab, setActiveTab] = useState<AppTab>('dashboard');
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [dailyReports, setDailyReports] = useState<DailyReport[]>([]);
 
   const {
     status,
@@ -20,6 +25,14 @@ export function App() {
     triggerCheck,
     sendSingleReminder
   } = useApi();
+
+  // Fetch daily report data for performance dashboard
+  useEffect(() => {
+    fetch('/api/reports')
+      .then(r => r.json())
+      .then(data => setDailyReports(data.reports || []))
+      .catch(err => console.error('Failed to load daily reports:', err));
+  }, []);
 
   const handleManualCheck = async () => {
     try {
@@ -95,8 +108,10 @@ export function App() {
                 onTriggerCheck={handleManualCheck}
                 onSendReminder={handleSendReminder}
               />
-            ) : (
+            ) : activeTab === 'logs' ? (
               <LogsTable runs={runs} />
+            ) : (
+              <PerformanceDashboard reports={dailyReports} />
             )}
           </>
         )}
@@ -105,8 +120,8 @@ export function App() {
       {/* Footer */}
       <footer className="border-t border-slate-200 dark:border-slate-800 py-6 text-center text-xs text-slate-500 bg-white/50 dark:bg-slate-900/50">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <span>Daily Task Email Automation &bull; Task 1</span>
-          <span>SQLite Database &bull; Gmail API &bull; node-cron 8:00 PM Mon–Fri</span>
+          <span>Daily Task Email Automation &bull; Task 1 + Performance Dashboard &bull; Task 2</span>
+          <span>SQLite &bull; Gmail API &bull; Chart.js &bull; ML Analytics &bull; node-cron 8:00 PM Mon–Fri</span>
         </div>
       </footer>
     </div>

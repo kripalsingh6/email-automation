@@ -2,13 +2,15 @@ import React from 'react';
 import { MailCheck, RefreshCw, Play, CheckCircle, AlertTriangle } from 'lucide-react';
 import type { StatusResponse, SchedulerStatus } from '../types';
 
+type AppTab = 'dashboard' | 'logs' | 'performance';
+
 interface HeaderProps {
   status: StatusResponse | null;
   scheduler: SchedulerStatus | null;
   checking: boolean;
   onTriggerCheck: () => void;
-  activeTab: 'dashboard' | 'logs';
-  setActiveTab: (tab: 'dashboard' | 'logs') => void;
+  activeTab: AppTab;
+  setActiveTab: (tab: AppTab) => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -32,9 +34,9 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
             <div>
               <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2 m-0">
-                Daily Task Email Automation
+                Email Automation & Analytics
                 <span className="text-xs font-medium px-2.5 py-0.5 rounded-md bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
-                  Task 1
+                  v1.0
                 </span>
               </h1>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
@@ -53,7 +55,7 @@ export const Header: React.FC<HeaderProps> = ({
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
               }`}
             >
-              Today's Live Status
+              Live Status
             </button>
             <button
               onClick={() => setActiveTab('logs')}
@@ -63,7 +65,17 @@ export const Header: React.FC<HeaderProps> = ({
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
               }`}
             >
-              Check History & Logs
+              Check Logs
+            </button>
+            <button
+              onClick={() => setActiveTab('performance')}
+              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
+                activeTab === 'performance'
+                  ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-white shadow-sm'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+              }`}
+            >
+              📊 Performance
             </button>
           </div>
 
@@ -125,7 +137,7 @@ export const Header: React.FC<HeaderProps> = ({
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
             }`}
           >
-            Today's Status
+            Status
           </button>
           <button
             onClick={() => setActiveTab('logs')}
@@ -135,7 +147,17 @@ export const Header: React.FC<HeaderProps> = ({
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
             }`}
           >
-            History & Logs
+            Logs
+          </button>
+          <button
+            onClick={() => setActiveTab('performance')}
+            className={`flex-1 py-1.5 rounded-md text-xs font-medium text-center ${
+              activeTab === 'performance'
+                ? 'bg-indigo-600 text-white'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+            }`}
+          >
+            📊 Performance
           </button>
         </div>
       </div>

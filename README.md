@@ -1,155 +1,177 @@
-# Daily Task Email Automation System 🚀
+# 📧 Email Automation & Performance Analytics
 
-An automated enterprise-grade system that monitors daily intern task report submissions via the **Gmail REST API**, verifies subject lines with fuzzy matching, dispatches styled HTML reminder emails to missing interns, schedules checks automatically at **8:00 PM on weekdays**, and provides a **real-time React dashboard** with full audit logs backed by SQLite.
-
----
-
-## 🌟 Key Features
-
-- **Automated Weekday Scheduler**: Uses `node-cron` configured for `8:00 PM Monday through Friday` (`0 20 * * 1-5`), automatically skipping weekends.
-- **Gmail REST API (OAuth 2.0)**: Secure Google OAuth2 authentication with persistent refresh tokens stored on disk.
-- **Fuzzy Subject Parser**: Intelligently verifies incoming emails matching variations of:
-  `Daily Task Update - [Name] - [DD/MM/YYYY]`
-- **Responsive HTML Reminder Emails**: Automatically formats and sends branded HTML reminder emails with urgency banners and expected submission formats.
-- **SQLite Persistence**: High-speed database with Write-Ahead Logging (`WAL`) mode tracking every check run and individual intern status.
-- **Modern Interactive Dashboard**:
-  - Live compliance statistics & percentage rates.
-  - Search and filter interns by status (`Submitted`, `Missing`, `Reminded`).
-  - Instant manual trigger button ("Run Check Now") and single-click direct reminders.
-  - Expandable historical audit log of all checks.
-- **Production-Ready**: Protected by `helmet` security headers, `express-rate-limit`, and unified static client hosting.
+> **Task 1:** Automated Daily Report Email Checker with Gmail API + Reminder System  
+> **Task 2:** Performance Dashboard with Chart.js + ML Analytics (Regression & Clustering)
 
 ---
 
-## 🏗️ Architecture
+## 🚀 Live Demo
+
+- **GitHub:** [github.com/kripalsingh6/email-automation](https://github.com/kripalsingh6/email-automation)
+- **Live:** Deployed on Vercel / your hosting
+
+---
+
+## ✨ Features
+
+### Task 1 — Email Automation
+- **Automated 8:00 PM Weekday Check** — cron job scans Gmail inbox for daily task update emails from interns
+- **Smart Email Parsing** — matches emails by sender, date, and subject pattern (fuzzy matching)
+- **Automatic Reminder Emails** — sends styled HTML reminder to interns who haven't submitted
+- **Google OAuth 2.0** — one-time Gmail authentication, tokens persisted for subsequent runs
+- **SQLite Database** — stores check runs, results, and reminder logs
+- **Real-time Dashboard** — shows live compliance status, employee cards, filter/search
+
+### Task 2 — Performance Dashboard
+- **Daily / Weekly / Monthly Trends** — toggle time granularity for performance metrics
+- **7 Interactive Charts** (Chart.js + react-chartjs-2):
+  - 📈 Rating Trends with Linear Regression Predictions
+  - 📊 Completion Rate & Task Volume Bar Chart
+  - 👥 Employee Comparison Line Chart
+  - 🎯 Performance Radar (multi-dimensional)
+  - 🍩 Work Category Distribution (Doughnut)
+  - 🍩 Task Severity Distribution (Doughnut)
+- **ML: Linear Regression** — predicts performance trend direction with R² score
+- **ML: K-Means Clustering** — classifies employees into 3 tiers:
+  - 🟢 Top Performer
+  - 🟡 Mid Performer
+  - 🔴 Needs Improvement
+- **Performance Leaderboard** — ranked table with composite score, ratings, completion %
+
+---
+
+## 🏗 Architecture
 
 ```
 email-automation/
-├── client/                     # Frontend (React 19, Vite, Tailwind CSS, Lucide)
-│   ├── src/
-│   │   ├── components/         # Header, Dashboard, EmployeeCard, StatusBadge, LogsTable
-│   │   ├── hooks/useApi.ts     # Real-time polling & API data fetcher
-│   │   ├── types/              # Frontend TypeScript definitions
-│   │   └── App.tsx             # Root dashboard layout
-│   ├── vite.config.ts          # Vite configuration with API proxy
-│   └── tsconfig.json           # Frontend TypeScript config
-│
-├── server/                     # Backend (Express.js, TypeScript, better-sqlite3)
-│   ├── config/env.ts           # Typed environment validator
-│   ├── db/                     # SQLite connection, migrations, prepared queries
-│   ├── middleware/             # Request logger, global error handler
-│   ├── routes/                 # REST API (/api/*) & Google OAuth (/auth/*)
-│   ├── services/
-│   │   ├── gmail.service.ts    # Gmail API OAuth client, inbox search, email dispatch
-│   │   ├── checker.service.ts  # Core compliance verification logic
-│   │   ├── reminder.service.ts # Automated reminder builder & sender
-│   │   └── scheduler.service.ts# node-cron 8:00 PM scheduler
-│   └── utils/                  # Date helpers, fuzzy subject parser, HTML email templates
-│
+├── client/                 # Vite + React + TailwindCSS frontend
+│   └── src/
+│       ├── components/     # Dashboard, Header, PerformanceDashboard, etc.
+│       ├── hooks/          # useApi hook for server communication
+│       ├── types/          # TypeScript interfaces
+│       └── utils/          # ml-analytics.ts (regression, clustering, aggregation)
+├── server/                 # Express v5 backend
+│   ├── config/             # Environment configuration
+│   ├── db/                 # SQLite (better-sqlite3) connection, migrations, queries
+│   ├── middleware/         # Logging, error handling
+│   ├── routes/             # API routes (status, check, remind, reports, auth)
+│   ├── services/           # Gmail, Checker, Reminder, Scheduler services
+│   ├── types/              # Server-side types
+│   └── utils/              # Date, parser, email template utilities
 ├── data/
-│   ├── employees.json          # Active intern roster
-│   └── email_automation.db     # SQLite database (auto-created on boot)
-├── .env.example                # Environment variables template
-└── package.json                # Project dependencies & orchestration scripts
+│   ├── employees.json      # Active intern roster
+│   └── daily-reports.json  # Daily work report data (simulated Excel data)
+└── .env                    # Gmail OAuth credentials + config
 ```
 
 ---
 
-## 🛠️ Tech Stack
+## 🛠 Tech Stack
 
-| Layer | Technologies |
-|---|---|
-| **Frontend** | React 19, TypeScript, Vite, Tailwind CSS v4, Lucide React |
-| **Backend** | Node.js, Express.js 5, TypeScript, `tsx` |
-| **Email & Auth** | Google OAuth 2.0, official `googleapis` Gmail REST API v1 |
-| **Scheduler** | `node-cron` |
-| **Database** | SQLite (`better-sqlite3` with WAL mode) |
-| **Security** | Helmet.js, Express Rate Limit, CORS |
+| Layer      | Technology                                         |
+| ---------- | -------------------------------------------------- |
+| Frontend   | React 19, Vite 8, TailwindCSS 4, Chart.js 4       |
+| Backend    | Express 5, TypeScript, SQLite (better-sqlite3)     |
+| Auth       | Google OAuth 2.0, Gmail API (googleapis)           |
+| Scheduler  | node-cron (weekdays 8:00 PM IST)                   |
+| ML         | Custom Linear Regression + K-Means (pure TS, zero deps) |
+| Icons      | Lucide React                                       |
 
 ---
 
-## 🚀 Quick Start Guide
+## ⚡ Quick Start
 
-### 1. Clone the repository
+### Prerequisites
+- Node.js ≥ 18
+- npm ≥ 9
+- Google Cloud project with Gmail API enabled
+
+### 1. Clone & Install
+
 ```bash
 git clone https://github.com/kripalsingh6/email-automation.git
 cd email-automation
-```
-
-### 2. Install dependencies
-```bash
 npm install
 ```
 
-### 3. Configure Environment Variables
-Copy `.env.example` to `.env`:
+### 2. Configure Environment
+
 ```bash
 cp .env.example .env
-```
-Fill in your credentials:
-```env
-# Google OAuth 2.0 Credentials (from Google Cloud Console)
-GMAIL_CLIENT_ID=your_google_client_id
-GMAIL_CLIENT_SECRET=your_google_client_secret
-GMAIL_REDIRECT_URI=http://localhost:3001/auth/callback
-GMAIL_REFRESH_TOKEN=
-
-# Team Lead / Application Inbox (Where updates are received & reminders sent from)
-TEAM_LEAD_EMAIL=thakurkripalsingh6@gmail.com
-
-# Schedule (8:00 PM Monday through Friday)
-CHECK_CRON=0 20 * * 1-5
-
-PORT=3001
-NODE_ENV=production
+# Fill in your Google OAuth credentials:
+# GMAIL_CLIENT_ID=
+# GMAIL_CLIENT_SECRET=
+# GMAIL_REDIRECT_URI=http://localhost:3001/auth/callback
+# TEAM_LEAD_EMAIL=thakurkripalsingh6@gmail.com
 ```
 
-### 4. Run the Application
+### 3. Run Development
 
-#### Development Mode (Frontend + Backend concurrently):
 ```bash
+# Terminal 1: Start backend server
+npm run server
+
+# Terminal 2: Start frontend dev server
+npm run dev
+
+# Or run both together:
 npm run dev:all
 ```
-- Frontend Dashboard: `http://localhost:5173`
-- Backend API: `http://localhost:3001`
 
-#### Production Mode:
+### 4. Connect Gmail
+Navigate to `http://localhost:5173`, click "Connect Gmail" → complete OAuth flow → tokens auto-saved.
+
+### 5. Build for Production
+
 ```bash
 npm run build
-npm start
+npm run start   # Serves both API + frontend from port 3001
 ```
-The unified production server serves both the API and the React frontend on `http://localhost:3001`.
 
 ---
 
-## 🔑 Google Cloud OAuth 2.0 Setup
+## 📊 ML Methodology
 
-1. Go to [Google Cloud Console](https://console.cloud.google.com/).
-2. Enable the **Gmail API** ([Direct Link](https://console.developers.google.com/apis/api/gmail.googleapis.com/overview)).
-3. Under **APIs & Services > Credentials**, create an **OAuth 2.0 Client ID** (Web application).
-4. Add Authorized Redirect URI:
-   `http://localhost:3001/auth/callback`
-5. Under **OAuth consent screen > Test users**, add your Team Lead Gmail address (e.g. `thakurkripalsingh6@gmail.com`).
-6. Visit `http://localhost:3001/auth/google` (or click **"Connect Gmail"** on the dashboard) to authenticate.
+### Linear Regression (Trend Prediction)
+- **Input:** Time-indexed manager ratings
+- **Method:** Ordinary Least Squares (OLS) regression
+- **Output:** Trend direction (improving / stable / declining), R² goodness of fit, next 3 period predictions
+- **Implementation:** Pure TypeScript, no external ML libraries
 
----
+### K-Means Clustering (Performance Tiers)
+- **Features:** Performance score, manager rating, completion rate, deadline adherence
+- **Initialization:** K-Means++ for stable centroid selection
+- **K:** 3 clusters → mapped to tier labels by average cluster score
+- **Output:** Each employee assigned a tier (Top / Mid / Needs Improvement)
 
-## 📡 REST API Reference
-
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/status` | Today's live compliance status and intern check results |
-| `POST` | `/api/check` | Trigger an immediate inbox check & send reminders |
-| `POST` | `/api/remind` | Send a reminder to a specific intern or missing group |
-| `GET` | `/api/logs` | Historical check run audit logs |
-| `GET` | `/api/logs/:runId` | Detailed results for a specific run ID |
-| `GET` | `/api/employees` | List of active interns from `data/employees.json` |
-| `GET` | `/api/scheduler` | Status of `node-cron` schedule and next run time |
-| `GET` | `/auth/status` | Status of Gmail OAuth2 connection |
-| `GET` | `/auth/google` | Initiates Google OAuth consent screen |
-| `GET` | `/api/health` | Service health check |
+### Composite Performance Score
+```
+Score = (Manager Rating × 5)     // 50% weight
+      + (Completion Rate × 0.2)   // 20% weight
+      + (Deadline Rate × 0.2)     // 20% weight
+      + (Tasks/Day × 2.5)         // 10% weight
+```
 
 ---
 
-## 📄 License
-MIT
+## 📄 API Endpoints
+
+| Method | Path                | Description                                |
+| ------ | ------------------- | ------------------------------------------ |
+| GET    | `/api/health`       | Server health check                        |
+| GET    | `/api/status`       | Today's compliance status                  |
+| POST   | `/api/check`        | Trigger manual inbox check + reminders     |
+| POST   | `/api/remind`       | Send reminder to specific employee         |
+| GET    | `/api/logs`         | Historical check runs                      |
+| GET    | `/api/employees`    | Active intern roster                       |
+| GET    | `/api/reports`      | Daily report data for Performance Dashboard|
+| GET    | `/api/scheduler`    | Cron scheduler status                      |
+| GET    | `/auth/google`      | Start Gmail OAuth flow                     |
+| GET    | `/auth/callback`    | OAuth callback handler                     |
+
+---
+
+## 👤 Author
+
+**Kripal Singh Thakur**  
+[github.com/kripalsingh6](https://github.com/kripalsingh6)

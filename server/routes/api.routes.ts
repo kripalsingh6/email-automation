@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 import { Router, Request, Response } from 'express';
 import { getTodayStatus, getRecentRuns, getResultsByRunId } from '../db/queries';
 import { loadEmployees, checkDailySubmissions } from '../services/checker.service';
@@ -124,6 +126,23 @@ router.post('/scheduler/start', (_req: Request, res: Response) => {
 router.post('/scheduler/stop', (_req: Request, res: Response) => {
   stopScheduler();
   res.json({ success: true, status: getSchedulerStatus() });
+});
+
+// GET /api/reports - Daily report data for Performance Dashboard (Task 2)
+router.get('/reports', (_req: Request, res: Response) => {
+  try {
+    const reportsPath = path.resolve(process.cwd(), 'data', 'daily-reports.json');
+    if (!fs.existsSync(reportsPath)) {
+      res.json({ reports: [] });
+      return;
+    }
+    const raw = fs.readFileSync(reportsPath, 'utf-8');
+    const reports = JSON.parse(raw);
+    res.json({ reports });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Failed to load reports';
+    res.status(500).json({ error: message });
+  }
 });
 
 export default router;
