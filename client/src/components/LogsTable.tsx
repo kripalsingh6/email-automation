@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { History, ChevronDown, ChevronRight, CheckCircle2, AlertCircle, Clock } from 'lucide-react';
 import type { CheckRun, CheckResult } from '../types';
 import { StatusBadge } from './StatusBadge';
+import { apiUrl } from '../utils/api';
 
 interface LogsTableProps {
   runs: CheckRun[];
@@ -23,7 +24,7 @@ export const LogsTable: React.FC<LogsTableProps> = ({ runs }) => {
     if (!runDetails[runId]) {
       try {
         setLoadingDetails(true);
-        const res = await fetch(`/api/logs/${runId}`).then(r => r.json());
+        const res = await fetch(apiUrl(`/api/logs/${runId}`)).then(r => r.json());
         setRunDetails(prev => ({ ...prev, [runId]: res.results || [] }));
       } catch (err) {
         console.error('Failed to fetch run details:', err);

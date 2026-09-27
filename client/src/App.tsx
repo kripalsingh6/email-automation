@@ -7,6 +7,7 @@ import { PerformanceDashboard } from './components/PerformanceDashboard';
 import type { ScoreData } from './components/ScoreInternModal';
 import { AlertCircle, RefreshCw } from 'lucide-react';
 import type { DailyReport } from './types/performance';
+import { apiUrl } from './utils/api';
 
 type AppTab = 'dashboard' | 'logs' | 'performance';
 
@@ -32,7 +33,7 @@ export function App() {
   } = useApi();
 
   const fetchReports = useCallback(() => {
-    fetch('/api/reports')
+    fetch(apiUrl('/api/reports'))
       .then(r => r.json())
       .then(data => setDailyReports(data.reports || []))
       .catch(err => console.error('Failed to load daily reports:', err));

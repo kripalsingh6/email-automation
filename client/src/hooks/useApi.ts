@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { StatusResponse, SchedulerStatus, CheckRun, Employee } from '../types';
+import { apiUrl } from '../utils/api';
 
 export function useApi() {
   const [status, setStatus] = useState<StatusResponse | null>(null);
@@ -13,10 +14,10 @@ export function useApi() {
   const fetchAll = useCallback(async () => {
     try {
       const [statusRes, schedRes, empRes, logsRes] = await Promise.all([
-        fetch('/api/status').then(r => r.json()),
-        fetch('/api/scheduler').then(r => r.json()),
-        fetch('/api/employees').then(r => r.json()),
-        fetch('/api/logs?limit=20').then(r => r.json())
+        fetch(apiUrl('/api/status')).then(r => r.json()),
+        fetch(apiUrl('/api/scheduler')).then(r => r.json()),
+        fetch(apiUrl('/api/employees')).then(r => r.json()),
+        fetch(apiUrl('/api/logs?limit=20')).then(r => r.json())
       ]);
 
       setStatus(statusRes);
@@ -49,7 +50,7 @@ export function useApi() {
   const triggerCheck = async (sendReminders = true) => {
     try {
       setChecking(true);
-      const res = await fetch('/api/check', {
+      const res = await fetch(apiUrl('/api/check'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sendReminders })
@@ -68,7 +69,7 @@ export function useApi() {
 
   const sendSingleReminder = async (runId: number, employeeId: string) => {
     try {
-      const res = await fetch('/api/remind', {
+      const res = await fetch(apiUrl('/api/remind'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ runId, employeeId })
@@ -84,7 +85,7 @@ export function useApi() {
 
   const addEmployee = async (emp: { name: string; email: string; role?: string }) => {
     try {
-      const res = await fetch('/api/employees', {
+      const res = await fetch(apiUrl('/api/employees'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(emp)
@@ -104,7 +105,7 @@ export function useApi() {
 
   const updateEmployee = async (id: string, emp: { name?: string; email?: string; role?: string; active?: boolean }) => {
     try {
-      const res = await fetch(`/api/employees/${id}`, {
+      const res = await fetch(apiUrl(`/api/employees/${id}`), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(emp)
@@ -124,7 +125,7 @@ export function useApi() {
 
   const deleteEmployee = async (id: string) => {
     try {
-      const res = await fetch(`/api/employees/${id}`, {
+      const res = await fetch(apiUrl(`/api/employees/${id}`), {
         method: 'DELETE'
       });
       const data = await res.json();
@@ -154,7 +155,7 @@ export function useApi() {
     link?: string;
   }) => {
     try {
-      const res = await fetch('/api/reports/score', {
+      const res = await fetch(apiUrl('/api/reports/score'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(scoreData)
