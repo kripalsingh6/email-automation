@@ -23,7 +23,11 @@ export function matchesExpectedSubject(
   const normalizedSub = normalizeText(subject);
 
   // Ignore reminder emails sent by the system
-  if (normalizedSub.startsWith('reminder:') || normalizedSub.includes('reminder pending') || normalizedSub.includes('reminder:')) {
+  if (
+    normalizedSub.startsWith('reminder:') ||
+    normalizedSub.includes('reminder pending') ||
+    normalizedSub.includes('reminder: pending')
+  ) {
     return false;
   }
 
@@ -35,18 +39,27 @@ export function matchesExpectedSubject(
     normalizedSub.includes('daily task update') ||
     normalizedSub.includes('daily task') ||
     normalizedSub.includes('task update') ||
-    normalizedSub.includes('daily update');
+    normalizedSub.includes('daily update') ||
+    normalizedSub.includes('daily report') ||
+    normalizedSub.includes('task report') ||
+    normalizedSub.includes('status update') ||
+    normalizedSub.includes('work update') ||
+    normalizedSub.includes('today task') ||
+    normalizedSub.includes('todays task');
 
-  const hasName = normalizedSub.includes(normalizedName);
-
-  // Check if subject at least has keyword and the intern name
-  if (hasKeyword && hasName) {
+  // If the email contains a task update keyword, it's a valid submission from this intern
+  if (hasKeyword) {
     return true;
   }
 
-  // Also check if subject contains the date and name even if phrased slightly differently
+  // Also check if subject contains the employee's name
+  if (normalizedName && normalizedSub.includes(normalizedName)) {
+    return true;
+  }
+
+  // Also check if subject contains today's date and "task" or "update" or "report"
   const hasDate = normalizedSub.includes(dateStr) || normalizedSub.includes(altDateStr);
-  if (hasName && hasDate) {
+  if (hasDate && (normalizedSub.includes('task') || normalizedSub.includes('update') || normalizedSub.includes('report'))) {
     return true;
   }
 
@@ -58,6 +71,6 @@ export function buildGmailQuery(
   employeeEmail: string,
   afterDateYMD: string
 ): string {
-  // Gmail query matching today's email from this employee
-  return `from:${employeeEmail} after:${afterDateYMD} subject:("Daily Task Update" OR "Daily Update" OR "${employeeName}")`;
+  // Gmail query matching today's email from this employee's address
+  return `from:${employeeEmail} after:${afterDateYMD}`;
 }

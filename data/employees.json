@@ -40,5 +40,12 @@
     "email": "karan.malhotra@gmail.com",
     "role": "DevOps Intern",
     "active": true
+  },
+  {
+    "id": "emp_06",
+    "name": "golu thakur",
+    "email": "farziterabhai@gmail.com",
+    "role": "Backend Intern",
+    "active": true
   }
 ]

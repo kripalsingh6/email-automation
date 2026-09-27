@@ -1,4 +1,4 @@
-import type { DailyReport, PerformanceMetrics, EmployeeTrend, ClusterResult, PredictionResult } from '../types/performance';
+import type { DailyReport, PerformanceMetrics, EmployeeTrend, ClusterResult, PredictionResult } from '../types';
 
 // ============================================================
 // Data Aggregation Utilities

@@ -16,9 +16,10 @@ import {
 import { Line, Bar, Doughnut, Radar } from 'react-chartjs-2';
 import {
   TrendingUp, TrendingDown, Minus, BarChart3, Activity,
-  Users, Target, Award, Brain, Layers, Calendar
+  Users, Target, Award, Brain, Layers, Calendar, Star
 } from 'lucide-react';
-import type { DailyReport, ClusterResult } from '../types/performance';
+import type { DailyReport, ClusterResult, Employee } from '../types';
+import { ScoreInternModal, type ScoreData } from './ScoreInternModal';
 import {
   computeEmployeeMetrics,
   computeDailyTrends,
@@ -56,13 +57,21 @@ const TIER_COLORS: Record<string, { bg: string; border: string; text: string }> 
 
 interface PerformanceDashboardProps {
   reports: DailyReport[];
+  employees?: Employee[];
+  onScoreIntern?: (scoreData: ScoreData) => Promise<void>;
 }
 
 type TimeRange = 'daily' | 'weekly' | 'monthly';
 
-export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ reports }) => {
+export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({
+  reports,
+  employees = [],
+  onScoreIntern
+}) => {
   const [timeRange, setTimeRange] = useState<TimeRange>('daily');
   const [selectedEmployee, setSelectedEmployee] = useState<string | 'all'>('all');
+  const [scoreModalOpen, setScoreModalOpen] = useState(false);
+  const [scoringEmployee, setScoringEmployee] = useState<Employee | null>(null);
 
   // Computed data
   const metrics = useMemo(() => computeEmployeeMetrics(reports), [reports]);
@@ -109,7 +118,7 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ repo
     plugins: {
       legend: {
         labels: {
-          color: '#94a3b8',
+          color: '#a1a1aa',
           font: { size: 11, family: 'Inter, system-ui, sans-serif' },
           padding: 16,
           usePointStyle: true,
@@ -117,10 +126,10 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ repo
         }
       },
       tooltip: {
-        backgroundColor: 'rgba(15, 23, 42, 0.95)',
-        titleColor: '#e2e8f0',
-        bodyColor: '#cbd5e1',
-        borderColor: 'rgba(148, 163, 184, 0.2)',
+        backgroundColor: 'rgba(9, 9, 11, 0.95)',
+        titleColor: '#ffffff',
+        bodyColor: '#e4e4e7',
+        borderColor: 'rgba(255, 255, 255, 0.12)',
         borderWidth: 1,
         padding: 12,
         cornerRadius: 8,
@@ -130,12 +139,12 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ repo
     },
     scales: {
       x: {
-        ticks: { color: '#94a3b8', font: { size: 10, family: 'Inter, system-ui, sans-serif' } },
-        grid: { color: 'rgba(148, 163, 184, 0.08)' }
+        ticks: { color: '#71717a', font: { size: 10, family: 'Inter, system-ui, sans-serif' } },
+        grid: { color: 'rgba(255, 255, 255, 0.06)' }
       },
       y: {
-        ticks: { color: '#94a3b8', font: { size: 10, family: 'Inter, system-ui, sans-serif' } },
-        grid: { color: 'rgba(148, 163, 184, 0.08)' }
+        ticks: { color: '#71717a', font: { size: 10, family: 'Inter, system-ui, sans-serif' } },
+        grid: { color: 'rgba(255, 255, 255, 0.06)' }
       }
     }
   };
@@ -317,10 +326,10 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ repo
     maintainAspectRatio: false,
     scales: {
       r: {
-        ticks: { color: '#94a3b8', backdropColor: 'transparent', font: { size: 9 } },
-        grid: { color: 'rgba(148, 163, 184, 0.15)' },
-        angleLines: { color: 'rgba(148, 163, 184, 0.15)' },
-        pointLabels: { color: '#94a3b8', font: { size: 10, family: 'Inter, system-ui, sans-serif' } },
+        ticks: { color: '#71717a', backdropColor: 'transparent', font: { size: 9 } },
+        grid: { color: 'rgba(255, 255, 255, 0.08)' },
+        angleLines: { color: 'rgba(255, 255, 255, 0.08)' },
+        pointLabels: { color: '#a1a1aa', font: { size: 10, family: 'Inter, system-ui, sans-serif' } },
         beginAtZero: true,
         max: 100
       }
@@ -352,109 +361,109 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ repo
       : Minus;
 
   const trendColor = prediction.trendDirection === 'improving'
-    ? 'text-emerald-500'
+    ? 'text-emerald-400'
     : prediction.trendDirection === 'declining'
-      ? 'text-rose-500'
-      : 'text-amber-500';
+      ? 'text-rose-400'
+      : 'text-amber-400';
 
   return (
     <div className="space-y-8">
       {/* ═══ KPI Summary Cards ═══ */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700/80 p-5 shadow-sm">
+        <div className="bg-zinc-900/90 rounded-2xl border border-zinc-800 p-5 shadow-lg shadow-black/40">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Total Reports</span>
-            <div className="p-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400">
+            <span className="text-xs font-medium text-zinc-400">Total Reports</span>
+            <div className="p-2 rounded-xl bg-zinc-800 text-indigo-400">
               <BarChart3 className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl font-extrabold text-slate-900 dark:text-white">{totalReports}</span>
-            <span className="text-xs text-slate-500">entries</span>
+            <span className="text-2xl font-extrabold text-white">{totalReports}</span>
+            <span className="text-xs text-zinc-500">entries</span>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700/80 p-5 shadow-sm">
+        <div className="bg-zinc-900/90 rounded-2xl border border-zinc-800 p-5 shadow-lg shadow-black/40">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Avg Manager Rating</span>
-            <div className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400">
+            <span className="text-xs font-medium text-zinc-400">Avg Manager Rating</span>
+            <div className="p-2 rounded-xl bg-emerald-950/60 text-emerald-400 border border-emerald-900/50">
               <Award className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl font-extrabold text-slate-900 dark:text-white">{avgRating}</span>
-            <span className="text-xs text-slate-500">/ 10</span>
+            <span className="text-2xl font-extrabold text-white">{avgRating}</span>
+            <span className="text-xs text-zinc-500">/ 10</span>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700/80 p-5 shadow-sm">
+        <div className="bg-zinc-900/90 rounded-2xl border border-zinc-800 p-5 shadow-lg shadow-black/40">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Completion Rate</span>
-            <div className="p-2 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400">
+            <span className="text-xs font-medium text-zinc-400">Completion Rate</span>
+            <div className="p-2 rounded-xl bg-amber-950/60 text-amber-400 border border-amber-900/50">
               <Target className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl font-extrabold text-slate-900 dark:text-white">{avgCompletion}%</span>
+            <span className="text-2xl font-extrabold text-white">{avgCompletion}%</span>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700/80 p-5 shadow-sm">
+        <div className="bg-zinc-900/90 rounded-2xl border border-zinc-800 p-5 shadow-lg shadow-black/40">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Deadline Adherence</span>
-            <div className="p-2 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400">
+            <span className="text-xs font-medium text-zinc-400">Deadline Adherence</span>
+            <div className="p-2 rounded-xl bg-blue-950/60 text-blue-400 border border-blue-900/50">
               <Calendar className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl font-extrabold text-slate-900 dark:text-white">{avgDeadline}%</span>
+            <span className="text-2xl font-extrabold text-white">{avgDeadline}%</span>
           </div>
         </div>
       </div>
 
       {/* ═══ ML Insights Banner ═══ */}
-      <div className="bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 dark:from-indigo-950/50 dark:via-purple-950/50 dark:to-pink-950/50 border border-indigo-200/60 dark:border-indigo-800/40 rounded-2xl p-5">
+      <div className="bg-gradient-to-r from-indigo-950/70 via-purple-950/50 to-zinc-900 border border-indigo-800/60 rounded-2xl p-5 shadow-lg shadow-black/40">
         <div className="flex items-center gap-3 mb-3">
-          <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/60">
-            <Brain className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+          <div className="p-2 rounded-lg bg-indigo-900/60 border border-indigo-700/50">
+            <Brain className="w-5 h-5 text-indigo-400" />
           </div>
-          <h3 className="font-semibold text-slate-900 dark:text-white">ML Performance Insights</h3>
+          <h3 className="font-semibold text-white">ML Performance Insights</h3>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="flex items-center gap-3 p-3 rounded-xl bg-white/60 dark:bg-slate-800/60">
+          <div className="flex items-center gap-3 p-3 rounded-xl bg-zinc-950/80 border border-zinc-800/80">
             <TrendIcon className={`w-5 h-5 ${trendColor}`} />
             <div>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Trend Direction</p>
+              <p className="text-xs text-zinc-400">Trend Direction</p>
               <p className={`text-sm font-semibold capitalize ${trendColor}`}>{prediction.trendDirection}</p>
             </div>
           </div>
-          <div className="flex items-center gap-3 p-3 rounded-xl bg-white/60 dark:bg-slate-800/60">
-            <Activity className="w-5 h-5 text-purple-500" />
+          <div className="flex items-center gap-3 p-3 rounded-xl bg-zinc-950/80 border border-zinc-800/80">
+            <Activity className="w-5 h-5 text-purple-400" />
             <div>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Regression R²</p>
-              <p className="text-sm font-semibold text-slate-900 dark:text-white">{prediction.r2.toFixed(2)}</p>
+              <p className="text-xs text-zinc-400">Regression R²</p>
+              <p className="text-sm font-semibold text-white">{prediction.r2.toFixed(2)}</p>
             </div>
           </div>
-          <div className="flex items-center gap-3 p-3 rounded-xl bg-white/60 dark:bg-slate-800/60">
-            <Layers className="w-5 h-5 text-pink-500" />
+          <div className="flex items-center gap-3 p-3 rounded-xl bg-zinc-950/80 border border-zinc-800/80">
+            <Layers className="w-5 h-5 text-pink-400" />
             <div>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Performance Clusters</p>
-              <p className="text-sm font-semibold text-slate-900 dark:text-white">{new Set(clustered.map(c => c.tier)).size} Tiers Identified</p>
+              <p className="text-xs text-zinc-400">Performance Clusters</p>
+              <p className="text-sm font-semibold text-white">{new Set(clustered.map(c => c.tier)).size} Tiers Identified</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* ═══ Time Range Toggle ═══ */}
-      <div className="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-xs w-fit">
+      <div className="flex items-center gap-1.5 p-1 bg-zinc-950 rounded-xl border border-zinc-800 text-xs w-fit">
         {(['daily', 'weekly', 'monthly'] as TimeRange[]).map(range => (
           <button
             key={range}
             onClick={() => setTimeRange(range)}
             className={`px-4 py-1.5 rounded-lg font-medium transition-all capitalize ${
               timeRange === range
-                ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                ? 'bg-zinc-800 text-indigo-400 shadow-sm border border-zinc-700'
+                : 'text-zinc-400 hover:text-white'
             }`}
           >
             {range}
@@ -464,9 +473,9 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ repo
 
       {/* ═══ Charts Row 1: Trend + Completion ═══ */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700/80 p-5 shadow-sm">
-          <h4 className="text-sm font-semibold text-slate-900 dark:text-white mb-1">Rating Trends & Predictions</h4>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
+        <div className="bg-zinc-900/90 rounded-2xl border border-zinc-800 p-5 shadow-lg shadow-black/40">
+          <h4 className="text-sm font-semibold text-white mb-1">Rating Trends & Predictions</h4>
+          <p className="text-xs text-zinc-400 mb-4">
             Linear regression prediction shown with dashed line (R² = {prediction.r2.toFixed(2)})
           </p>
           <div className="h-72">
@@ -474,9 +483,9 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ repo
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700/80 p-5 shadow-sm">
-          <h4 className="text-sm font-semibold text-slate-900 dark:text-white mb-1">Completion Rate & Task Volume</h4>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">Green = ≥90%, Amber = ≥70%, Red = &lt;70%</p>
+        <div className="bg-zinc-900/90 rounded-2xl border border-zinc-800 p-5 shadow-lg shadow-black/40">
+          <h4 className="text-sm font-semibold text-white mb-1">Completion Rate & Task Volume</h4>
+          <p className="text-xs text-zinc-400 mb-4">Green = ≥90%, Amber = ≥70%, Red = &lt;70%</p>
           <div className="h-72">
             <Bar data={completionChartData} options={completionOptions} />
           </div>
@@ -485,18 +494,18 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ repo
 
       {/* ═══ Charts Row 2: Employee Comparison + Radar ═══ */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700/80 p-5 shadow-sm">
+        <div className="bg-zinc-900/90 rounded-2xl border border-zinc-800 p-5 shadow-lg shadow-black/40">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h4 className="text-sm font-semibold text-slate-900 dark:text-white">Employee Comparison</h4>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Individual rating trajectories over time</p>
+              <h4 className="text-sm font-semibold text-white">Employee Comparison</h4>
+              <p className="text-xs text-zinc-400 mt-0.5">Individual rating trajectories over time</p>
             </div>
             <select
               id="employee-filter"
               name="employeeFilter"
               value={selectedEmployee}
               onChange={(e) => setSelectedEmployee(e.target.value)}
-              className="text-xs px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+              className="text-xs px-3 py-1.5 rounded-lg border border-zinc-800 bg-zinc-950 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
             >
               <option value="all">All Employees</option>
               {metrics.map(m => (
@@ -509,9 +518,9 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ repo
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700/80 p-5 shadow-sm">
-          <h4 className="text-sm font-semibold text-slate-900 dark:text-white mb-1">Performance Radar</h4>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">Multi-dimensional comparison across all metrics</p>
+        <div className="bg-zinc-900/90 rounded-2xl border border-zinc-800 p-5 shadow-lg shadow-black/40">
+          <h4 className="text-sm font-semibold text-white mb-1">Performance Radar</h4>
+          <p className="text-xs text-zinc-400 mb-4">Multi-dimensional comparison across all metrics</p>
           <div className="h-72">
             <Radar data={radarData} options={radarOptions} />
           </div>
@@ -520,17 +529,17 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ repo
 
       {/* ═══ Charts Row 3: Category + Severity Distributions ═══ */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700/80 p-5 shadow-sm">
-          <h4 className="text-sm font-semibold text-slate-900 dark:text-white mb-1">Work Category Distribution</h4>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">Task categories across all reports</p>
+        <div className="bg-zinc-900/90 rounded-2xl border border-zinc-800 p-5 shadow-lg shadow-black/40">
+          <h4 className="text-sm font-semibold text-white mb-1">Work Category Distribution</h4>
+          <p className="text-xs text-zinc-400 mb-4">Task categories across all reports</p>
           <div className="h-56 flex items-center justify-center">
             <Doughnut data={categoryChartData} options={doughnutOptions} />
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700/80 p-5 shadow-sm">
-          <h4 className="text-sm font-semibold text-slate-900 dark:text-white mb-1">Task Severity Distribution</h4>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">Priority levels across all tasks</p>
+        <div className="bg-zinc-900/90 rounded-2xl border border-zinc-800 p-5 shadow-lg shadow-black/40">
+          <h4 className="text-sm font-semibold text-white mb-1">Task Severity Distribution</h4>
+          <p className="text-xs text-zinc-400 mb-4">Priority levels across all tasks</p>
           <div className="h-56 flex items-center justify-center">
             <Doughnut data={severityChartData} options={doughnutOptions} />
           </div>
@@ -538,14 +547,14 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ repo
       </div>
 
       {/* ═══ ML: Employee Performance Tiers (Clustering) ═══ */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700/80 p-5 shadow-sm">
+      <div className="bg-zinc-900/90 rounded-2xl border border-zinc-800 p-5 shadow-lg shadow-black/40">
         <div className="flex items-center gap-3 mb-5">
-          <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/40">
-            <Users className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+          <div className="p-2 rounded-lg bg-purple-950/70 border border-purple-800/60">
+            <Users className="w-5 h-5 text-purple-400" />
           </div>
           <div>
-            <h4 className="text-sm font-semibold text-slate-900 dark:text-white">Employee Performance Tiers</h4>
-            <p className="text-xs text-slate-500 dark:text-slate-400">K-Means clustering based on composite metrics</p>
+            <h4 className="text-sm font-semibold text-white">Employee Performance Tiers</h4>
+            <p className="text-xs text-zinc-400">K-Means clustering based on composite metrics</p>
           </div>
         </div>
 
@@ -557,58 +566,82 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ repo
       </div>
 
       {/* ═══ Detailed Leaderboard Table ═══ */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700/80 shadow-sm overflow-hidden">
-        <div className="p-5 border-b border-slate-200 dark:border-slate-700">
-          <h4 className="text-sm font-semibold text-slate-900 dark:text-white">Performance Leaderboard</h4>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Ranked by composite performance score</p>
+      <div className="bg-zinc-900/90 rounded-2xl border border-zinc-800 shadow-xl shadow-black/50 overflow-hidden">
+        <div className="p-5 border-b border-zinc-800">
+          <h4 className="text-sm font-semibold text-white">Performance Leaderboard</h4>
+          <p className="text-xs text-zinc-400 mt-0.5">Ranked by composite performance score</p>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="bg-slate-50 dark:bg-slate-800/50">
-                <th className="px-5 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">#</th>
-                <th className="px-5 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Employee</th>
-                <th className="px-5 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Score</th>
-                <th className="px-5 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Mgr Rating</th>
-                <th className="px-5 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Completion</th>
-                <th className="px-5 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Deadlines</th>
-                <th className="px-5 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Tasks/Day</th>
-                <th className="px-5 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Tier</th>
+              <tr className="bg-zinc-950 text-zinc-400 border-b border-zinc-800">
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider">#</th>
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider">Employee</th>
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider">Score</th>
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider">Mgr Rating</th>
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider">Completion</th>
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider">Deadlines</th>
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider">Tasks/Day</th>
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider">Tier</th>
+                <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-right">Action</th>
               </tr>
             </thead>
             <tbody>
               {clustered.map((emp, i) => {
                 const tierStyle = TIER_COLORS[emp.tier] || TIER_COLORS['Mid Performer'];
                 return (
-                  <tr key={emp.employee_id} className="border-t border-slate-100 dark:border-slate-700/60 hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors">
-                    <td className="px-5 py-3.5 text-sm font-bold text-slate-400">{i + 1}</td>
+                  <tr key={emp.employee_id} className="border-t border-zinc-800/80 hover:bg-zinc-800/40 transition-colors">
+                    <td className="px-5 py-3.5 text-sm font-bold text-zinc-500">{i + 1}</td>
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: EMPLOYEE_COLORS[i % EMPLOYEE_COLORS.length].border }}>
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-sm" style={{ backgroundColor: EMPLOYEE_COLORS[i % EMPLOYEE_COLORS.length].border }}>
                           {emp.name.charAt(0)}
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-slate-900 dark:text-white">{emp.name}</p>
-                          <p className="text-xs text-slate-500 dark:text-slate-400">{emp.role}</p>
+                          <p className="text-sm font-medium text-white">{emp.name}</p>
+                          <p className="text-xs text-zinc-400">{emp.role}</p>
                         </div>
                       </div>
                     </td>
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-2">
-                        <div className="w-16 h-1.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                        <div className="w-16 h-1.5 rounded-full bg-zinc-800 overflow-hidden">
                           <div className="h-full rounded-full bg-indigo-500" style={{ width: `${emp.performanceScore}%` }} />
                         </div>
-                        <span className="text-sm font-semibold text-slate-900 dark:text-white">{emp.performanceScore}</span>
+                        <span className="text-sm font-semibold text-white">{emp.performanceScore}</span>
                       </div>
                     </td>
-                    <td className="px-5 py-3.5 text-sm text-slate-700 dark:text-slate-300">{emp.avgManagerRating}/10</td>
-                    <td className="px-5 py-3.5 text-sm text-slate-700 dark:text-slate-300">{emp.completionRate}%</td>
-                    <td className="px-5 py-3.5 text-sm text-slate-700 dark:text-slate-300">{emp.deadlineRate}%</td>
-                    <td className="px-5 py-3.5 text-sm text-slate-700 dark:text-slate-300">{emp.avgTasksPerDay}</td>
+                    <td className="px-5 py-3.5 text-sm text-zinc-300">{emp.avgManagerRating}/10</td>
+                    <td className="px-5 py-3.5 text-sm text-zinc-300">{emp.completionRate}%</td>
+                    <td className="px-5 py-3.5 text-sm text-zinc-300">{emp.deadlineRate}%</td>
+                    <td className="px-5 py-3.5 text-sm text-zinc-300">{emp.avgTasksPerDay}</td>
                     <td className="px-5 py-3.5">
                       <span className="px-2.5 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: tierStyle.bg, color: tierStyle.text, border: `1px solid ${tierStyle.border}33` }}>
                         {emp.tier}
                       </span>
+                    </td>
+                    <td className="px-5 py-3.5 text-right">
+                      {onScoreIntern && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const empObj: Employee = employees.find(e => e.id === emp.employee_id) || {
+                              id: emp.employee_id,
+                              name: emp.name,
+                              email: '',
+                              role: emp.role,
+                              active: true
+                            };
+                            setScoringEmployee(empObj);
+                            setScoreModalOpen(true);
+                          }}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 transition-all cursor-pointer select-none active:scale-95"
+                          title="Evaluate and give manager rating (1-10)"
+                        >
+                          <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                          <span>Rate</span>
+                        </button>
+                      )}
                     </td>
                   </tr>
                 );
@@ -617,6 +650,23 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ repo
           </table>
         </div>
       </div>
+
+      {/* Score Intern Modal */}
+      {onScoreIntern && (
+        <ScoreInternModal
+          isOpen={scoreModalOpen}
+          onClose={() => {
+            setScoreModalOpen(false);
+            setScoringEmployee(null);
+          }}
+          employee={scoringEmployee}
+          onSaveScore={async (scoreData) => {
+            await onScoreIntern(scoreData);
+            setScoreModalOpen(false);
+            setScoringEmployee(null);
+          }}
+        />
+      )}
     </div>
   );
 };
@@ -626,35 +676,35 @@ const EmployeeTierCard: React.FC<{ employee: ClusterResult; index: number }> = (
   const tierStyle = TIER_COLORS[employee.tier] || TIER_COLORS['Mid Performer'];
 
   return (
-    <div className="p-4 rounded-xl border transition-all hover:shadow-md" style={{ borderColor: tierStyle.border + '40', backgroundColor: tierStyle.bg }}>
+    <div className="p-4 rounded-xl border transition-all hover:shadow-lg hover:shadow-black/40" style={{ borderColor: tierStyle.border + '40', backgroundColor: tierStyle.bg }}>
       <div className="flex items-center gap-3 mb-3">
-        <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white" style={{ backgroundColor: EMPLOYEE_COLORS[index % EMPLOYEE_COLORS.length].border }}>
+        <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-sm" style={{ backgroundColor: EMPLOYEE_COLORS[index % EMPLOYEE_COLORS.length].border }}>
           {employee.name.charAt(0)}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{employee.name}</p>
-          <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{employee.role}</p>
+          <p className="text-sm font-semibold text-white truncate">{employee.name}</p>
+          <p className="text-xs text-zinc-400 truncate">{employee.role}</p>
         </div>
         <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide" style={{ color: tierStyle.text, border: `1px solid ${tierStyle.border}` }}>
           {employee.tier}
         </span>
       </div>
       <div className="grid grid-cols-2 gap-2 text-xs">
-        <div className="p-2 rounded-lg bg-white/60 dark:bg-slate-800/60">
-          <span className="text-slate-500 dark:text-slate-400 block">Score</span>
-          <span className="font-bold text-slate-900 dark:text-white">{employee.performanceScore}/100</span>
+        <div className="p-2 rounded-lg bg-zinc-950/80 border border-zinc-800/60">
+          <span className="text-zinc-400 block">Score</span>
+          <span className="font-bold text-white">{employee.performanceScore}/100</span>
         </div>
-        <div className="p-2 rounded-lg bg-white/60 dark:bg-slate-800/60">
-          <span className="text-slate-500 dark:text-slate-400 block">Rating</span>
-          <span className="font-bold text-slate-900 dark:text-white">{employee.avgManagerRating}/10</span>
+        <div className="p-2 rounded-lg bg-zinc-950/80 border border-zinc-800/60">
+          <span className="text-zinc-400 block">Rating</span>
+          <span className="font-bold text-white">{employee.avgManagerRating}/10</span>
         </div>
-        <div className="p-2 rounded-lg bg-white/60 dark:bg-slate-800/60">
-          <span className="text-slate-500 dark:text-slate-400 block">Completion</span>
-          <span className="font-bold text-slate-900 dark:text-white">{employee.completionRate}%</span>
+        <div className="p-2 rounded-lg bg-zinc-950/80 border border-zinc-800/60">
+          <span className="text-zinc-400 block">Completion</span>
+          <span className="font-bold text-white">{employee.completionRate}%</span>
         </div>
-        <div className="p-2 rounded-lg bg-white/60 dark:bg-slate-800/60">
-          <span className="text-slate-500 dark:text-slate-400 block">Tasks/Day</span>
-          <span className="font-bold text-slate-900 dark:text-white">{employee.avgTasksPerDay}</span>
+        <div className="p-2 rounded-lg bg-zinc-950/80 border border-zinc-800/60">
+          <span className="text-zinc-400 block">Tasks/Day</span>
+          <span className="font-bold text-white">{employee.avgTasksPerDay}</span>
         </div>
       </div>
     </div>

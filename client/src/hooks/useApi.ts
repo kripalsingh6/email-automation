@@ -82,6 +82,96 @@ export function useApi() {
     }
   };
 
+  const addEmployee = async (emp: { name: string; email: string; role?: string }) => {
+    try {
+      const res = await fetch('/api/employees', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(emp)
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to add intern');
+      }
+      await fetchAll();
+      return data.employee;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to add intern';
+      setError(msg);
+      throw err;
+    }
+  };
+
+  const updateEmployee = async (id: string, emp: { name?: string; email?: string; role?: string; active?: boolean }) => {
+    try {
+      const res = await fetch(`/api/employees/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(emp)
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to update intern');
+      }
+      await fetchAll();
+      return data.employee;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to update intern';
+      setError(msg);
+      throw err;
+    }
+  };
+
+  const deleteEmployee = async (id: string) => {
+    try {
+      const res = await fetch(`/api/employees/${id}`, {
+        method: 'DELETE'
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to remove intern');
+      }
+      await fetchAll();
+      return data;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to remove intern';
+      setError(msg);
+      throw err;
+    }
+  };
+
+  const scoreEmployee = async (scoreData: {
+    employee_id: string;
+    date?: string;
+    manager_rating: number;
+    self_rating?: number;
+    status?: string;
+    severity?: string;
+    category?: string;
+    deadline_met?: boolean;
+    tasks?: string;
+    tomorrows_tasks?: string;
+    link?: string;
+  }) => {
+    try {
+      const res = await fetch('/api/reports/score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(scoreData)
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to submit score');
+      }
+      await fetchAll();
+      return data.report;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to submit score';
+      setError(msg);
+      throw err;
+    }
+  };
+
   return {
     status,
     scheduler,
@@ -92,6 +182,10 @@ export function useApi() {
     error,
     refresh: fetchAll,
     triggerCheck,
-    sendSingleReminder
+    sendSingleReminder,
+    addEmployee,
+    updateEmployee,
+    deleteEmployee,
+    scoreEmployee
   };
 }

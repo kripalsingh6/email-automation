@@ -20,3 +20,7 @@ export function isWeekday(date: Date = new Date()): boolean {
 export function getISOTimestamp(date: Date = new Date()): string {
   return date.toISOString();
 }
+
+export function isPastDeadline(date: Date = new Date(), deadlineHour: number = 20): boolean {
+  return date.getHours() >= deadlineHour;
+}

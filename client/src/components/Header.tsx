@@ -1,5 +1,5 @@
 import React from 'react';
-import { MailCheck, RefreshCw, Play, CheckCircle, AlertTriangle } from 'lucide-react';
+import { MailCheck, RefreshCw, Play, CheckCircle, AlertTriangle, Activity, History, BarChart3 } from 'lucide-react';
 import type { StatusResponse, SchedulerStatus } from '../types';
 
 type AppTab = 'dashboard' | 'logs' | 'performance';
@@ -15,7 +15,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({
   status,
-  scheduler,
+  scheduler: _scheduler,
   checking,
   onTriggerCheck,
   activeTab,
@@ -23,103 +23,92 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const isGmailAuth = status?.gmail.authenticated;
 
+  const tabs: { id: AppTab; label: string; icon: React.ReactNode }[] = [
+    { id: 'dashboard', label: 'Live Status', icon: <Activity className="w-4 h-4 shrink-0" /> },
+    { id: 'logs', label: 'Check Logs', icon: <History className="w-4 h-4 shrink-0" /> },
+    { id: 'performance', label: 'Performance', icon: <BarChart3 className="w-4 h-4 shrink-0" /> },
+  ];
+
   return (
-    <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30 transition-colors">
+    <header className="bg-black/95 backdrop-blur-md border-b border-zinc-900 sticky top-0 z-30 transition-all shadow-lg shadow-black/40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
+        {/* Main Header Row */}
+        <div className="flex flex-wrap items-center justify-between py-3.5 gap-4">
           {/* Logo & Title */}
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/25">
-              <MailCheck className="w-6 h-6 text-white" />
+          <div className="flex items-center gap-3 sm:gap-4 shrink-0">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/25 shrink-0">
+              <MailCheck className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2 m-0">
+              <h1 className="text-base sm:text-lg font-bold tracking-tight text-white flex items-center gap-2 m-0">
                 Email Automation & Analytics
-                <span className="text-xs font-medium px-2.5 py-0.5 rounded-md bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                <span className="text-[10px] sm:text-xs font-semibold px-2 py-0.5 rounded-md bg-zinc-900 text-indigo-400 border border-zinc-800">
                   v1.0
                 </span>
               </h1>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Automated 8:00 PM Weekday Check &bull; Inbox: <span className="font-semibold text-indigo-600 dark:text-indigo-400">thakurkripalsingh6@gmail.com</span>
+              <p className="text-[11px] sm:text-xs text-zinc-400 mt-0.5 truncate max-w-xs sm:max-w-md">
+                Inbox: <span className="font-semibold text-indigo-400">thakurkripalsingh6@gmail.com</span>
               </p>
             </div>
           </div>
 
-          {/* Navigation Tabs */}
-          <div className="hidden md:flex items-center p-1 bg-slate-100 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
-            <button
-              onClick={() => setActiveTab('dashboard')}
-              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
-                activeTab === 'dashboard'
-                  ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-white shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-              }`}
-            >
-              Live Status
-            </button>
-            <button
-              onClick={() => setActiveTab('logs')}
-              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
-                activeTab === 'logs'
-                  ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-white shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-              }`}
-            >
-              Check Logs
-            </button>
-            <button
-              onClick={() => setActiveTab('performance')}
-              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
-                activeTab === 'performance'
-                  ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-white shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-              }`}
-            >
-              📊 Performance
-            </button>
-          </div>
+          {/* Large Screen Navigation Tabs (Hidden on medium/small, shown on lg+) */}
+          <nav className="hidden lg:flex items-center p-1 bg-zinc-950/90 rounded-xl border border-zinc-800/90 shadow-inner">
+            {tabs.map(tab => {
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-150 cursor-pointer select-none ${
+                    isActive
+                      ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/30'
+                      : 'text-zinc-400 hover:text-white hover:bg-zinc-900/80'
+                  }`}
+                >
+                  {tab.icon}
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
+          </nav>
 
           {/* Action Bar */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
             {/* Gmail Connection Status */}
             {isGmailAuth ? (
-              <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800">
-                <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />
-                Gmail Connected
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-950/70 text-emerald-300 border border-emerald-800/80">
+                <CheckCircle className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                <span className="hidden sm:inline">Gmail Connected</span>
+                <span className="sm:hidden">Connected</span>
               </span>
             ) : (
               <a
                 href="/auth/google"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800 transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-amber-950/70 text-amber-300 border border-amber-800/80 hover:bg-amber-900/80 transition-colors cursor-pointer"
                 title="Click to authenticate Team Lead Gmail via OAuth 2.0"
               >
-                <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
-                Connect Gmail
+                <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                <span>Connect Gmail</span>
               </a>
             )}
 
-            {/* Scheduler Status Badge */}
-            <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-slate-600 dark:text-slate-300 font-medium">
-                Cron: {scheduler?.cronExpression || '8:00 PM Weekdays'}
-              </span>
-            </div>
-
             {/* Run Check Now Button */}
             <button
+              type="button"
               onClick={onTriggerCheck}
               disabled={checking}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 shadow-md shadow-indigo-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform active:scale-95"
+              className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 shadow-lg shadow-indigo-500/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95 cursor-pointer select-none"
             >
               {checking ? (
                 <>
-                  <RefreshCw className="w-4 h-4 animate-spin" />
-                  <span>Checking Inbox...</span>
+                  <RefreshCw className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin shrink-0" />
+                  <span>Checking...</span>
                 </>
               ) : (
                 <>
-                  <Play className="w-4 h-4 fill-current" />
+                  <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current shrink-0" />
                   <span>Run Check Now</span>
                 </>
               )}
@@ -127,39 +116,29 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* Mobile Tab Bar */}
-        <div className="flex md:hidden pb-3 gap-2">
-          <button
-            onClick={() => setActiveTab('dashboard')}
-            className={`flex-1 py-1.5 rounded-md text-xs font-medium text-center ${
-              activeTab === 'dashboard'
-                ? 'bg-indigo-600 text-white'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
-            }`}
-          >
-            Status
-          </button>
-          <button
-            onClick={() => setActiveTab('logs')}
-            className={`flex-1 py-1.5 rounded-md text-xs font-medium text-center ${
-              activeTab === 'logs'
-                ? 'bg-indigo-600 text-white'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
-            }`}
-          >
-            Logs
-          </button>
-          <button
-            onClick={() => setActiveTab('performance')}
-            className={`flex-1 py-1.5 rounded-md text-xs font-medium text-center ${
-              activeTab === 'performance'
-                ? 'bg-indigo-600 text-white'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
-            }`}
-          >
-            📊 Performance
-          </button>
-        </div>
+        {/* Medium & Mobile Screen Navigation Tabs (Visible on < lg screens) */}
+        <nav className="flex lg:hidden pb-3 pt-1">
+          <div className="grid grid-cols-3 w-full p-1 bg-zinc-950/90 rounded-xl border border-zinc-800/90 gap-1 shadow-inner">
+            {tabs.map(tab => {
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-semibold transition-all duration-150 cursor-pointer select-none text-center ${
+                    isActive
+                      ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/30'
+                      : 'text-zinc-400 hover:text-white hover:bg-zinc-900/80'
+                  }`}
+                >
+                  {tab.icon}
+                  <span className="truncate">{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </nav>
       </div>
     </header>
   );
