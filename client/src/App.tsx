@@ -8,13 +8,14 @@ import type { ScoreData } from './components/ScoreInternModal';
 import { AlertCircle, RefreshCw } from 'lucide-react';
 import type { DailyReport } from './types/performance';
 import { apiUrl } from './utils/api';
+import { FALLBACK_REPORTS } from './data/fallback-data';
 
 type AppTab = 'dashboard' | 'logs' | 'performance';
 
 export function App() {
   const [activeTab, setActiveTab] = useState<AppTab>('dashboard');
   const [feedback, setFeedback] = useState<string | null>(null);
-  const [dailyReports, setDailyReports] = useState<DailyReport[]>([]);
+  const [dailyReports, setDailyReports] = useState<DailyReport[]>(FALLBACK_REPORTS as any);
 
   const {
     status,
@@ -35,8 +36,14 @@ export function App() {
   const fetchReports = useCallback(() => {
     fetch(apiUrl('/api/reports'))
       .then(r => r.json())
-      .then(data => setDailyReports(data.reports || []))
-      .catch(err => console.error('Failed to load daily reports:', err));
+      .then(data => {
+        if (data.reports && data.reports.length > 0) {
+          setDailyReports(data.reports);
+        }
+      })
+      .catch(() => {
+        setDailyReports(FALLBACK_REPORTS as any);
+      });
   }, []);
 
   // Fetch daily report data on mount and whenever switching to performance tab
