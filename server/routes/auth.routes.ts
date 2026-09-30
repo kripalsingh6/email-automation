@@ -24,7 +24,7 @@ router.get('/google', (_req: Request, res: Response) => {
         <body style="font-family: system-ui; padding: 40px; text-align: center;">
           <h2>⚠️ Gmail Credentials Missing</h2>
           <p>Please provide <code>GMAIL_CLIENT_ID</code> and <code>GMAIL_CLIENT_SECRET</code> in your <code>.env</code> file.</p>
-          <a href="http://localhost:5173" style="color: #4f46e5;">Return to Dashboard</a>
+          <a href="${env.CLIENT_URL}" style="color: #4f46e5;">Return to Dashboard</a>
         </body>
       </html>
     `);
@@ -46,7 +46,7 @@ router.get('/callback', async (req: Request, res: Response) => {
         <body style="font-family: system-ui; padding: 40px; text-align: center;">
           <h2 style="color: #ef4444;">OAuth Authorization Failed</h2>
           <p>${error}</p>
-          <a href="http://localhost:5173" style="color: #4f46e5;">Return to Dashboard</a>
+          <a href="${env.CLIENT_URL}" style="color: #4f46e5;">Return to Dashboard</a>
         </body>
       </html>
     `);
@@ -58,7 +58,7 @@ router.get('/callback', async (req: Request, res: Response) => {
       <html>
         <body style="font-family: system-ui; padding: 40px; text-align: center;">
           <h2>No Authorization Code Provided</h2>
-          <a href="http://localhost:5173" style="color: #4f46e5;">Return to Dashboard</a>
+          <a href="${env.CLIENT_URL}" style="color: #4f46e5;">Return to Dashboard</a>
         </body>
       </html>
     `);
@@ -73,7 +73,7 @@ router.get('/callback', async (req: Request, res: Response) => {
       <html>
         <head>
           <title>Google Account Connected</title>
-          <meta http-equiv="refresh" content="3;url=http://localhost:5173" />
+          <meta http-equiv="refresh" content="3;url=${env.CLIENT_URL}" />
           <style>
             body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #f8fafc; }
             .card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center; max-width: 480px; }
@@ -90,7 +90,7 @@ router.get('/callback', async (req: Request, res: Response) => {
             <h2>Gmail Connected Successfully!</h2>
             <p>Your Team Lead email account has been authenticated. Redirecting you to the dashboard...</p>
             ${refreshToken ? `<p style="font-size: 12px; color: #94a3b8;">Add this to GMAIL_REFRESH_TOKEN in .env to preserve across server restarts:</p><div class="token-box">${refreshToken}</div>` : ''}
-            <a href="http://localhost:5173" class="btn">Return to Dashboard</a>
+            <a href="${env.CLIENT_URL}" class="btn">Return to Dashboard</a>
           </div>
         </body>
       </html>
@@ -103,7 +103,7 @@ router.get('/callback', async (req: Request, res: Response) => {
         <body style="font-family: system-ui; padding: 40px; text-align: center;">
           <h2 style="color: #ef4444;">Authorization Error</h2>
           <p>${message}</p>
-          <a href="http://localhost:5173" style="color: #4f46e5;">Return to Dashboard</a>
+          <a href="${env.CLIENT_URL}" style="color: #4f46e5;">Return to Dashboard</a>
         </body>
       </html>
     `);
