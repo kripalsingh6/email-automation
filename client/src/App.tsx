@@ -54,15 +54,16 @@ export function App() {
   const handleManualCheck = async () => {
     try {
       setFeedback('Running inbox check and dispatching reminders...');
-      const res = await triggerCheck(true);
+      const res = await triggerCheck(true, true);
       fetchReports();
       setFeedback(
         `✅ Check complete! ${res.data.submittedCount} submitted, ${res.data.missingCount} missing. ${res.remindersSent} reminders dispatched.`
       );
       setTimeout(() => setFeedback(null), 6000);
-    } catch {
-      setFeedback('❌ Failed to run check. Check server console for details.');
-      setTimeout(() => setFeedback(null), 6000);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to run check.';
+      setFeedback(`❌ ${msg}`);
+      setTimeout(() => setFeedback(null), 8000);
     }
   };
 
@@ -71,9 +72,10 @@ export function App() {
       await sendSingleReminder(runId, employeeId);
       setFeedback('✉️ Reminder email sent successfully!');
       setTimeout(() => setFeedback(null), 4000);
-    } catch {
-      setFeedback('❌ Failed to send reminder email.');
-      setTimeout(() => setFeedback(null), 4000);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to send reminder email.';
+      setFeedback(`❌ ${msg}`);
+      setTimeout(() => setFeedback(null), 8000);
     }
   };
 

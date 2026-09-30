@@ -57,15 +57,27 @@ export function useApi() {
     };
   }, [fetchAll]);
 
-  const triggerCheck = async (sendReminders = true) => {
+  const triggerCheck = async (sendReminders = true, forceReminders = true) => {
     try {
       setChecking(true);
       const res = await fetch(apiUrl('/api/check'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sendReminders })
+        body: JSON.stringify({ sendReminders, forceReminders })
       });
+
+      const contentType = res.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        throw new Error(
+          'Backend connection failed. If on Vercel, please set VITE_API_URL to your Render backend URL in Vercel Project Settings.'
+        );
+      }
+
       const data = await res.json();
+      if (!res.ok || data.success === false) {
+        throw new Error(data.error || data.message || `Check request failed (${res.status})`);
+      }
+
       await fetchAll();
       return data;
     } catch (err: unknown) {
@@ -84,8 +96,19 @@ export function useApi() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ runId, employeeId })
       });
+
+      const contentType = res.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        throw new Error('Backend connection failed. Please check VITE_API_URL.');
+      }
+
+      const data = await res.json();
+      if (!res.ok || data.success === false) {
+        throw new Error(data.error || data.message || `Reminder failed (${res.status})`);
+      }
+
       await fetchAll();
-      return await res.json();
+      return data;
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Reminder failed';
       setError(msg);

@@ -15,6 +15,7 @@ export interface EnvConfig {
   EMPLOYEES_FILE: string;
   NODE_ENV: string;
   CLIENT_URL: string;
+  TIMEZONE: string;
 }
 
 export const env: EnvConfig = {
@@ -28,7 +29,8 @@ export const env: EnvConfig = {
   DB_PATH: path.resolve(process.cwd(), 'data', 'email_automation.db'),
   EMPLOYEES_FILE: path.resolve(process.cwd(), 'data', 'employees.json'),
   NODE_ENV: process.env.NODE_ENV || 'development',
-  CLIENT_URL: process.env.CLIENT_URL || 'http://localhost:5173'
+  CLIENT_URL: process.env.CLIENT_URL || 'http://localhost:5173',
+  TIMEZONE: process.env.TIMEZONE || 'Asia/Kolkata'
 };
 
 export function validateEnv(): { valid: boolean; missing: string[] } {

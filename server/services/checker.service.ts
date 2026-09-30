@@ -35,7 +35,8 @@ async function processInBatches<T, R>(
 }
 
 export async function checkDailySubmissions(
-  trigger: 'scheduled' | 'manual' = 'manual'
+  trigger: 'scheduled' | 'manual' = 'manual',
+  forceMissingStatus: boolean = false
 ): Promise<CheckExecutionResult> {
   const today = new Date();
   const runDate = getTodayDateString(today);
@@ -61,17 +62,19 @@ export async function checkDailySubmissions(
           subjectFound: matchedEmail.subject
         };
       } else {
+        const markMissing = isPast8PM || trigger === 'manual' || forceMissingStatus;
         return {
           employee: emp,
-          status: (isPast8PM ? 'missing' : 'pending') as SubmissionStatus,
+          status: (markMissing ? 'missing' : 'pending') as SubmissionStatus,
           subjectFound: undefined
         };
       }
     } catch (err) {
       console.error(`⚠️ Error checking email for ${emp.name}:`, err);
+      const markMissing = isPast8PM || trigger === 'manual' || forceMissingStatus;
       return {
         employee: emp,
-        status: (isPast8PM ? 'missing' : 'pending') as SubmissionStatus,
+        status: (markMissing ? 'missing' : 'pending') as SubmissionStatus,
         subjectFound: undefined
       };
     }

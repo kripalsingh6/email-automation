@@ -54,11 +54,11 @@ router.get('/status', (_req: Request, res: Response) => {
 router.post('/check', async (req: Request, res: Response) => {
   try {
     const isPast8PM = isPastDeadline(new Date(), 20);
-    // Reminders are strictly dispatched only after 8 PM (unless explicitly forced)
-    const shouldSendReminders = req.body.forceReminders === true || (isPast8PM && req.body.sendReminders !== false);
+    // Allow reminders on manual check when sendReminders !== false or past deadline or forced
+    const shouldSendReminders = req.body.forceReminders === true || req.body.sendReminders === true || isPast8PM;
     console.log(`Manual check triggered. Send reminders: ${shouldSendReminders} (Past 8 PM: ${isPast8PM})`);
 
-    const result = await checkDailySubmissions('manual');
+    const result = await checkDailySubmissions('manual', true);
 
     let remindersDispatched = 0;
     if (shouldSendReminders && result.missing.length > 0) {
@@ -73,6 +73,7 @@ router.post('/check', async (req: Request, res: Response) => {
     });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Error during /api/check:', error);
     res.status(500).json({ success: false, error: message });
   }
 });
@@ -97,7 +98,8 @@ router.post('/remind', async (req: Request, res: Response) => {
       }
     } else {
       const results = getResultsByRunId(runId);
-      const missingIds = new Set(results.filter(r => r.status === 'missing').map(r => r.employee_id));
+      const eligibleStatuses = new Set(['missing', 'pending']);
+      const missingIds = new Set(results.filter(r => eligibleStatuses.has(r.status)).map(r => r.employee_id));
       targetEmployees = employees.filter(e => missingIds.has(e.id));
     }
 
@@ -105,6 +107,7 @@ router.post('/remind', async (req: Request, res: Response) => {
     res.json({ success: true, data: reminderResult });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Error during /api/remind:', error);
     res.status(500).json({ success: false, error: message });
   }
 });
