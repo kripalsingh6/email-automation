@@ -3,14 +3,14 @@ services:
     name: email-automation-backend
     env: node
     plan: free
-    buildCommand: npm install
+    buildCommand: npm install && npm run build
     startCommand: npm start
     healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
         value: production
       - key: CLIENT_URL
-        sync: false
+        value: https://email-automation-puce.vercel.app
       - key: GMAIL_CLIENT_ID
         sync: false
       - key: GMAIL_CLIENT_SECRET
