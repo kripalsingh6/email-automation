@@ -104,6 +104,16 @@ router.post('/remind', async (req: Request, res: Response) => {
     }
 
     const reminderResult = await sendReminders(targetEmployees, runId);
+    if (targetEmployees.length > 0 && reminderResult.sentCount === 0) {
+      const firstError = reminderResult.remindedEmployees.find(e => e.error)?.error || 'Failed to dispatch email';
+      res.status(500).json({
+        success: false,
+        error: `Failed to send reminder: ${firstError}`,
+        data: reminderResult
+      });
+      return;
+    }
+
     res.json({ success: true, data: reminderResult });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';

@@ -1,4 +1,4 @@
-import { formatDisplayDate } from './date';
+import { formatDisplayDate, getTodayDateString } from './date';
 
 export function normalizeText(text: string): string {
   return text
@@ -16,7 +16,8 @@ export function buildExpectedSubject(name: string, date: Date = new Date()): str
 export function matchesExpectedSubject(
   subject: string,
   employeeName: string,
-  date: Date = new Date()
+  date: Date = new Date(),
+  emailDateStr?: string
 ): boolean {
   if (!subject) return false;
 
@@ -32,6 +33,7 @@ export function matchesExpectedSubject(
   }
 
   const normalizedName = normalizeText(employeeName);
+  const firstName = normalizedName.split(' ')[0];
   const dateStr = formatDisplayDate(date);
   const altDateStr = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
 
@@ -45,32 +47,55 @@ export function matchesExpectedSubject(
     normalizedSub.includes('status update') ||
     normalizedSub.includes('work update') ||
     normalizedSub.includes('today task') ||
-    normalizedSub.includes('todays task');
+    normalizedSub.includes('todays task') ||
+    normalizedSub.includes('task') ||
+    normalizedSub.includes('report') ||
+    normalizedSub.includes('update') ||
+    normalizedSub.includes('standup') ||
+    normalizedSub.includes('eod') ||
+    normalizedSub.includes('work') ||
+    normalizedSub.includes('submission');
 
   // If the email contains a task update keyword, it's a valid submission from this intern
   if (hasKeyword) {
     return true;
   }
 
-  // Also check if subject contains the employee's name
+  // Also check if subject contains the employee's name or first name
   if (normalizedName && normalizedSub.includes(normalizedName)) {
     return true;
   }
-
-  // Also check if subject contains today's date and "task" or "update" or "report"
-  const hasDate = normalizedSub.includes(dateStr) || normalizedSub.includes(altDateStr);
-  if (hasDate && (normalizedSub.includes('task') || normalizedSub.includes('update') || normalizedSub.includes('report'))) {
+  if (firstName && firstName.length > 2 && normalizedSub.includes(firstName)) {
     return true;
+  }
+
+  // Also check if subject contains today's date
+  const hasDate = normalizedSub.includes(dateStr) || normalizedSub.includes(altDateStr);
+  if (hasDate) {
+    return true;
+  }
+
+  // If email date is within today, and sent by this intern, treat as daily submission
+  if (emailDateStr) {
+    try {
+      const emailDate = new Date(emailDateStr);
+      if (getTodayDateString(emailDate) === getTodayDateString(date)) {
+        return true;
+      }
+    } catch {
+      // ignore date parse errors
+    }
   }
 
   return false;
 }
 
 export function buildGmailQuery(
-  employeeName: string,
+  _employeeName: string,
   employeeEmail: string,
-  afterDateYMD: string
+  _afterDateYMD?: string
 ): string {
-  // Gmail query matching today's email from this employee's address
-  return `from:${employeeEmail} after:${afterDateYMD}`;
+  // Query recent emails from this intern (newer_than:2d avoids strict midnight UTC query failures)
+  const cleanEmail = employeeEmail.trim().toLowerCase();
+  return `from:${cleanEmail} newer_than:2d`;
 }

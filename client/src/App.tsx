@@ -69,7 +69,12 @@ export function App() {
 
   const handleSendReminder = async (runId: number, employeeId: string) => {
     try {
-      await sendSingleReminder(runId, employeeId);
+      const res = await sendSingleReminder(runId, employeeId);
+      if (res?.data && res.data.sentCount === 0) {
+        const firstErr = res.data.remindedEmployees?.[0]?.error || 'Failed to dispatch email';
+        throw new Error(firstErr);
+      }
+      fetchReports();
       setFeedback('✉️ Reminder email sent successfully!');
       setTimeout(() => setFeedback(null), 4000);
     } catch (err: unknown) {

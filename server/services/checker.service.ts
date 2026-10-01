@@ -53,7 +53,7 @@ export async function checkDailySubmissions(
       const emails = await searchEmails(query);
 
       // Find an email that matches the expected daily task subject pattern
-      const matchedEmail = emails.find(e => matchesExpectedSubject(e.subject, emp.name, today));
+      const matchedEmail = emails.find(e => matchesExpectedSubject(e.subject, emp.name, today, e.date));
 
       if (matchedEmail) {
         return {

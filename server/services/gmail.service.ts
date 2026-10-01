@@ -199,11 +199,12 @@ export async function sendEmail(to: string, subject: string, htmlBody: string): 
     const gmail = google.gmail({ version: 'v1', auth });
 
     // Format RFC 2822 email
-    const sender = env.TEAM_LEAD_EMAIL || 'me';
+    const cleanTo = to.trim();
+    const sender = env.TEAM_LEAD_EMAIL ? env.TEAM_LEAD_EMAIL.trim() : '';
     const utf8Subject = `=?utf-8?B?${Buffer.from(subject).toString('base64')}?=`;
     const messageParts = [
-      `From: ${sender}`,
-      `To: ${to}`,
+      ...(sender ? [`From: ${sender}`] : []),
+      `To: ${cleanTo}`,
       `Subject: ${utf8Subject}`,
       'MIME-Version: 1.0',
       'Content-Type: text/html; charset=utf-8',
