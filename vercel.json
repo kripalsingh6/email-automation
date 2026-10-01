@@ -4,6 +4,14 @@
   "framework": "vite",
   "rewrites": [
     {
+      "source": "/api/(.*)",
+      "destination": "https://email-automation-backend-6ekc.onrender.com/api/$1"
+    },
+    {
+      "source": "/auth/(.*)",
+      "destination": "https://email-automation-backend-6ekc.onrender.com/auth/$1"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
