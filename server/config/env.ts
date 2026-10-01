@@ -18,11 +18,25 @@ export interface EnvConfig {
   TIMEZONE: string;
 }
 
+function resolveRedirectUri(): string {
+  const uri = process.env.GMAIL_REDIRECT_URI || '';
+  if (uri && !uri.includes('<') && !uri.includes('service-name') && !uri.includes('your-render')) {
+    return uri;
+  }
+  if (process.env.RENDER_EXTERNAL_URL) {
+    return `${process.env.RENDER_EXTERNAL_URL.replace(/\/$/, '')}/auth/callback`;
+  }
+  if (process.env.NODE_ENV === 'production') {
+    return 'https://email-automation-backend-6ekc.onrender.com/auth/callback';
+  }
+  return 'http://localhost:3001/auth/callback';
+}
+
 export const env: EnvConfig = {
   PORT: parseInt(process.env.PORT || '3001', 10),
   GMAIL_CLIENT_ID: process.env.GMAIL_CLIENT_ID || '',
   GMAIL_CLIENT_SECRET: process.env.GMAIL_CLIENT_SECRET || '',
-  GMAIL_REDIRECT_URI: process.env.GMAIL_REDIRECT_URI || 'http://localhost:3001/auth/callback',
+  GMAIL_REDIRECT_URI: resolveRedirectUri(),
   GMAIL_REFRESH_TOKEN: process.env.GMAIL_REFRESH_TOKEN || '',
   TEAM_LEAD_EMAIL: process.env.TEAM_LEAD_EMAIL || 'teamlead@example.com',
   CHECK_CRON: process.env.CHECK_CRON || '0 20 * * 1-5',
